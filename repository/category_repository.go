@@ -14,13 +14,17 @@ type CategoryRepository interface {
 	Update(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category
 	Delete(ctx context.Context, tx *sql.Tx, category domain.Category)
 	FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error)
-	FindAll(ctx context.Context, tx *sql.Tx) []domain.Category
-	Filter(ctx context.Context, tx *sql.Tx, category domain.Category) []domain.Category
+	FindAll(ctx context.Context, tx *sql.Tx, filterKey string) []domain.Category
+	Filter(ctx context.Context, tx *sql.Tx, filterKey string) []domain.Category
 }
 
 // Category Repo Implementation
 
 type CategoryRepositoryImpl struct {
+}
+
+func NewCategoryRepository() CategoryRepository {
+	return &CategoryRepositoryImpl{}
 }
 
 func (repository *CategoryRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
@@ -39,13 +43,14 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx
 	return category
 }
 func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, category domain.Category) {
-	query := "delete category where id = ?"
+	query := "delete from category where id = ? "
 	_, err := tx.ExecContext(ctx, query, category.Id)
 	helper.PanicIfError(err)
 }
 func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error) {
 	query := "select * from category where id = ?"
 	result, err := tx.QueryContext(ctx, query, categoryId)
+	defer result.Close()
 	helper.PanicIfError(err)
 	category := domain.Category{}
 	if result.Next() {
@@ -56,11 +61,21 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 		return category, errors.New("Data tidak ditemukan")
 	}
 }
-func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Category {
-	query := "select * from category"
-	result, err := tx.QueryContext(ctx, query)
+func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, filterKey string) []domain.Category {
+	var query string
+	var args []interface{}
+
+	if filterKey != "" {
+		query = `SELECT * FROM category WHERE name LIKE ?`
+		args = append(args, "%"+filterKey+"%")
+	} else {
+		query = "SELECT * FROM category"
+	}
+	result, err := tx.QueryContext(ctx, query, args...)
+	defer result.Close()
 	helper.PanicIfError(err)
 	var categories []domain.Category
+
 	for result.Next() {
 		category := domain.Category{}
 		err := result.Scan(&category.Id, &category.Name)
@@ -69,9 +84,10 @@ func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	}
 	return categories
 }
-func (repository *CategoryRepositoryImpl) Filter(ctx context.Context, tx *sql.Tx, category domain.Category) []domain.Category {
+func (repository *CategoryRepositoryImpl) Filter(ctx context.Context, tx *sql.Tx, filterKey string) []domain.Category {
 	query := "select * from category"
 	result, err := tx.QueryContext(ctx, query)
+	defer result.Close()
 	helper.PanicIfError(err)
 	var categories []domain.Category
 	for result.Next() {

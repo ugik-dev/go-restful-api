@@ -2,11 +2,14 @@ package helper
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 func ReadRequestBody(request *http.Request, result interface{}) {
 	decoder := json.NewDecoder(request.Body)
+	fmt.Println("=========ReadRequestBody==================")
+	fmt.Println(result)
 	err := decoder.Decode(&result)
 	PanicIfError(err)
 }
