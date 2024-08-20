@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/go-playground/validator"
 	"github.com/ugik-dev/go-restful-api.git/helper"
 	"github.com/ugik-dev/go-restful-api.git/models/domain"
 	"github.com/ugik-dev/go-restful-api.git/models/web"
@@ -22,9 +23,13 @@ type CategoryService interface {
 type CategoryServiceImp struct {
 	CategoryRepository repository.CategoryRepository
 	DB                 *sql.DB
+	Validate           *validator.Validate
 }
 
 func (service *CategoryServiceImp) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.ComitOrRollback(tx)
@@ -38,6 +43,9 @@ func (service *CategoryServiceImp) Create(ctx context.Context, request web.Categ
 }
 
 func (service *CategoryServiceImp) Update(ctx context.Context, request web.CategoryUpdateRequest) web.CategoryResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.ComitOrRollback(tx)
