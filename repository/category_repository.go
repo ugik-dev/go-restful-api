@@ -12,9 +12,9 @@ import (
 type CategoryRepository interface {
 	Create(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category
 	Update(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category
-	Delete(ctx context.Context, tx *sql.Tx, categoryId int)
+	Delete(ctx context.Context, tx *sql.Tx, category domain.Category)
 	FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error)
-	FindAll(ctx context.Context, tx *sql.Tx, category domain.Category) []domain.Category
+	FindAll(ctx context.Context, tx *sql.Tx) []domain.Category
 	Filter(ctx context.Context, tx *sql.Tx, category domain.Category) []domain.Category
 }
 
@@ -38,9 +38,9 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx
 	helper.PanicIfError(err)
 	return category
 }
-func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, categoryId int) {
+func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, category domain.Category) {
 	query := "delete category where id = ?"
-	_, err := tx.ExecContext(ctx, query, categoryId)
+	_, err := tx.ExecContext(ctx, query, category.Id)
 	helper.PanicIfError(err)
 }
 func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error) {
