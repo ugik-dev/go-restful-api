@@ -8,8 +8,11 @@ package certificate
 
 // Injectors from injector.go:
 
-func InitializedCertService() *CertificateService {
+func InitializedCertService() (*CertificateService, error) {
 	certificateRepository := NewCertificateRepository()
-	certificateService := NewCertificateService(certificateRepository)
-	return certificateService
+	certificateService, err := NewCertificateService(certificateRepository)
+	if err != nil {
+		return nil, err
+	}
+	return certificateService, nil
 }

@@ -6,6 +6,8 @@ import (
 )
 
 func TestCallCertificateService(t *testing.T) {
-	certificateService := InitializedCertService()
-	fmt.Print(certificateService.CertificateRepository)
+	certificateService, err := InitializedCertService()
+	// helper.PanicIfError(err)
+	fmt.Print(err)
+	fmt.Print(certificateService)
 }

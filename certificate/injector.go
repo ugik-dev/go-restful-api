@@ -6,9 +6,9 @@ package certificate
 
 import "github.com/google/wire"
 
-func InitializedCertService() *CertificateService {
+func InitializedCertService() (*CertificateService, error) {
 	wire.Build(NewCertificateRepository, NewCertificateService)
-	return nil
+	return nil, nil
 }
 
 /**

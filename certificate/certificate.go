@@ -1,6 +1,9 @@
 package certificate
 
+import "errors"
+
 type CertificateRepository struct {
+	Error bool
 }
 
 type CertificateService struct {
@@ -8,11 +11,17 @@ type CertificateService struct {
 }
 
 func NewCertificateRepository() *CertificateRepository {
-	return &CertificateRepository{}
+	return &CertificateRepository{
+		Error: true,
+	}
 }
 
-func NewCertificateService(repository *CertificateRepository) *CertificateService {
-	return &CertificateService{
-		CertificateRepository: repository,
+func NewCertificateService(repository *CertificateRepository) (*CertificateService, error) {
+	if repository.Error {
+		return nil, errors.New("Gagal membuat service")
+	} else {
+		return &CertificateService{
+			CertificateRepository: repository,
+		}, nil
 	}
 }
