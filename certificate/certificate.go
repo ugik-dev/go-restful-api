@@ -10,9 +10,9 @@ type CertificateService struct {
 	*CertificateRepository
 }
 
-func NewCertificateRepository() *CertificateRepository {
+func NewCertificateRepository(isError bool) *CertificateRepository {
 	return &CertificateRepository{
-		Error: true,
+		Error: isError,
 	}
 }
 
